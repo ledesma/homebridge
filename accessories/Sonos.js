@@ -5,6 +5,7 @@ function SonosAccessory(log, config) {
   this.log = log;
   this.name = config["name"];
   this.playVolume = config["play_volume"];
+  this.udn = config["UDN"];
   this.device = null;
   this.search();
 }
@@ -18,8 +19,8 @@ SonosAccessory.prototype = {
       that.log("Found device at " + device.host);
 
       device.deviceDescription(function (err, description) {
-
-        if (description["zoneType"] == '3') {
+        //that.log(JSON.stringify(description));
+        if (description["UDN"] == that.udn) {
           that.log("Found playable device");
           // device is an instance of sonos.Sonos
           that.device = device;
