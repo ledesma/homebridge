@@ -159,7 +159,7 @@ function createHAPServer(name, services, displayName) {
     nextPort = nextPort + (nextServer*2);
 
     // hardcode the PIN to something random (same PIN as HAP-NodeJS sample accessories)
-    var pincode = "123-45-123";//"031-45-154";
+    var pincode = "031-45-154";
 	
 	if (displayName === undefined)
 		displayName = name;
