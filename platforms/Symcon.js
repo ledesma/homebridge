@@ -21,7 +21,7 @@ SymconPlatform.prototype = {
 					that.client.call({
 						"jsonrpc" : "2.0",
 						"method" : "IPS_GetInstanceListByModuleID",
-						"params" : ['{2D871359-14D8-493F-9B01-26432E3A710F}'],
+						"params" : ['{101352E1-88C7-4F16-998B-E20D50779AF6}'],
 						"id" : 0
 					},
 					function (err, res) {
@@ -72,13 +72,13 @@ SymconPlatform.prototype = {
 								}
 							],
 							function (err, results) {
-								
 								var name = results[0];
 								var instance = typeof results[1] === 'object' ? results[1] : JSON.parse(results[1]);
 								var instanceConfig = typeof results[2] === 'object' ? results[2] : JSON.parse(results[2]);
+								//that.log(JSON.stringify(instanceConfig));
 								var instance = new SymconAccessory(that.log, that.options.rpcClientOptions, instanceId, name, instance, instanceConfig);
 								
-								if (instance.instanceConfig.Unit == 0 || instance.instanceConfig.Unit == 2) {
+								if (instance.type == 0 || instance.type == 1) {
 									foundAccessories.push(instance);
 									that.log("new instance found: " + results[0]);
 								}
@@ -108,16 +108,27 @@ function SymconAccessory(log, rpcClientOptions, instanceId, name, instance, inst
 	this.instanceConfig = instanceConfig;
 	this.defaultRamp = 3; // default ramp in seconds
 	this.commands = [];
-	
+	this.type = null;
+
 	switch (this.instance.ModuleInfo.ModuleID) {
-		case '{2D871359-14D8-493F-9B01-26432E3A710F}': // LCN Unit
-			this.writeLogEntry('adding commands for LCN Unit (Type: ' + this.instanceConfig.Unit + ')...');
-			switch (this.instanceConfig.Unit) {
-				case 0: // output
+		case '{101352E1-88C7-4F16-998B-E20D50779AF6}': // Zwave Module
+			modes = eval(this.instanceConfig.NodeClasses);
+			for(i in modes) { 
+				if(modes[i] == 37) {
+					this.type = 1;
+				}
+				else if (modes[i] == 38) {
+					this.type = 0; 
+				}
+			};
+
+			this.writeLogEntry('adding commands for ZWave Module ' + this.displayName + ' (Modes: ' + modes + ')...');
+			switch (this.type) {
+				case 0: // dimmer
 					this.commands.push('SetBrightness');
 					this.commands.push('SetPowerState');
 					break;
-				case 2: // relay
+				case 1: // switch
 					this.commands.push('SetPowerState');
 					break;
 			}
@@ -133,15 +144,15 @@ SymconAccessory.prototype = {
 		var params;
 		
 		switch (this.instance.ModuleInfo.ModuleID) {
-			case '{2D871359-14D8-493F-9B01-26432E3A710F}': // LCN Unit
-				switch (this.instanceConfig.Unit) {
-					case 0: // output
-						method = 'LCN_SetIntensity';
-						params = [this.instanceId, value ? 100 : 0, 0];
+			case '{101352E1-88C7-4F16-998B-E20D50779AF6}': // Zwave Module
+				switch (this.type) {
+					case 0: // dimmer
+						method = 'ZW_SwitchMode';
+						params = [this.instanceId, value ? true : false];
 						break;
-					case 2: // relay
-						method = 'LCN_SwitchRelay';
-						params = [this.instanceId, value];
+					case 1: // switch
+						method = 'ZW_SwitchMode';
+						params = [this.instanceId, value ? true : false];
 						break;
 					default:
 						return;
@@ -160,11 +171,11 @@ SymconAccessory.prototype = {
 		var params;
 		
 		switch (this.instance.ModuleInfo.ModuleID) {
-			case '{2D871359-14D8-493F-9B01-26432E3A710F}': // LCN Unit
-				switch (this.instanceConfig.Unit) {
-					case 0: // output
-						method = 'LCN_SetIntensity';
-						params = [this.instanceId, value, this.defaultRamp];
+			case '{101352E1-88C7-4F16-998B-E20D50779AF6}': // Zwave Module
+				switch (this.type) {
+					case 0: // dimmer
+						method = 'ZW_DimSet';
+						params = [this.instanceId, value];
 						break;
 					default:
 						return;
