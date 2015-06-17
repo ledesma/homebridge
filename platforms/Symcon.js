@@ -325,11 +325,12 @@ SymconAccessory.prototype = {
 	},
 
 	sType : function () {
-		if (this.commands.indexOf('SetBrightness') != -1) {
-			return types.LIGHTBULB_STYPE;
-		} else {
-			return types.SWITCH_STYPE;
-		}
+		return types.SWITCH_STYPE;
+		//if (this.commands.indexOf('SetBrightness') != -1) {
+		//	return types.LIGHTBULB_STYPE;
+		//} else {
+		//	return types.SWITCH_STYPE;
+		//}
 	},
 
 	getServices : function () {
