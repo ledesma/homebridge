@@ -325,7 +325,7 @@ SymconAccessory.prototype = {
 	},
 
 	sType : function () {
-		return types.SWITCH_STYPE;
+		return types.LIGHTBULB_STYPE;
 		//if (this.commands.indexOf('SetBrightness') != -1) {
 		//	return types.LIGHTBULB_STYPE;
 		//} else {
